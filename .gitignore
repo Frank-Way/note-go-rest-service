@@ -1,0 +1,5 @@
+/.idea/*
+/pgadmin/*
+/pgdata/*
+/user_service/*.exe
+/note_service/*.exe

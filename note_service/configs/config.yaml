@@ -1,0 +1,14 @@
+log_level: "trace"
+listen:
+  type: "port"
+  bind_ip: "127.0.0.1"
+  port: "8008"
+repository:
+  type: "in_memory"
+  configs:
+    in_memory:
+      attr_1: "val1"
+    redis:
+      attr_1: "val1"
+    postgres:
+      attr_1: "val1"
