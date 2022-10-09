@@ -1,5 +1,12 @@
 package server
 
+import (
+	"gopkg.in/yaml.v3"
+	"log"
+	"os"
+	"sync"
+)
+
 type Config struct {
 	LogLevel string `yaml:"log_level"`
 	Listen   struct {
@@ -23,13 +30,20 @@ type Config struct {
 	} `yaml:"repository"`
 }
 
-func NewConfig() *Config {
-	var c = &Config{
-		LogLevel: "info",
-	}
-	c.Listen.Type = "port"
-	c.Listen.BindIP = "127.0.0.1"
-	c.Listen.Port = "8000"
-	c.Repository.Type = "in_memory"
-	return c
+var instance *Config
+var once sync.Once
+
+func NewConfig(configPath string) *Config {
+	once.Do(func() {
+		instance = &Config{}
+		yamlFile, err := os.ReadFile(configPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err := yaml.Unmarshal(yamlFile, &instance); err != nil {
+			log.Fatal(err)
+		}
+	})
+	return instance
 }
