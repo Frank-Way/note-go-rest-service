@@ -4,6 +4,7 @@ import (
 	"github.com/Frank-Way/note-go-rest-service/user_service/internal/user"
 	"github.com/Frank-Way/note-go-rest-service/user_service/internal/user/repositories"
 	"github.com/sirupsen/logrus"
+	"net"
 	"net/http"
 )
 
@@ -16,11 +17,15 @@ type Server struct {
 
 func NewServer(config *Config) *Server {
 	var logger = logrus.New()
+	var repository user.Repository
+	if config.Repository.Type == "in_memory" {
+		repository = repositories.NewInMemoryRepository(logger)
+	}
 	return &Server{
 		config:  config,
 		logger:  logger,
 		router:  http.NewServeMux(),
-		handler: user.NewHandler(repositories.NewInMemoryRepository(), logger),
+		handler: user.NewHandler(repository, logger),
 	}
 }
 
@@ -29,7 +34,7 @@ func (s *Server) Start() error {
 		return err
 	}
 
-	var addr = s.config.Listen.BindIP + ":" + s.config.Listen.Port
+	var addr = net.JoinHostPort(s.config.Listen.BindIP, s.config.Listen.Port)
 
 	s.logger.Info("starting user server on address: " + addr)
 

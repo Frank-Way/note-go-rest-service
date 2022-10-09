@@ -27,19 +27,15 @@ func NewInMemoryRepository(logger *logrus.Logger) note.Repository {
 	return imr
 }
 
-func (imr *inMemoryRepository) Save(ctx context.Context, title, text string) (string, error) {
+func (imr *inMemoryRepository) Save(ctx context.Context, note note.Note) (string, error) {
 	imr.Lock()
 	defer imr.Unlock()
 
-	n := note.Note{
-		Id:     imr.nextId,
-		Title:  title,
-		Text:   text,
-		Author: "no-author",
-	}
-	imr.notes[n.Id] = n
+	note.Id = imr.nextId
+	note.Author = "no-author"
+	imr.notes[note.Id] = note
 	imr.nextId++
-	return strconv.Itoa(int(n.Id)), nil
+	return strconv.Itoa(int(note.Id)), nil
 }
 
 func (imr *inMemoryRepository) GetById(ctx context.Context, id uint) (note.Note, error) {
@@ -65,18 +61,18 @@ func (imr *inMemoryRepository) GetAll(ctx context.Context) (note.Notes, error) {
 	return res, nil
 }
 
-func (imr *inMemoryRepository) Update(ctx context.Context, id uint, title, text string) error {
+func (imr *inMemoryRepository) Update(ctx context.Context, note note.Note) error {
 	imr.Lock()
 	defer imr.Unlock()
 
-	n, ok := imr.notes[id]
+	n, ok := imr.notes[note.Id]
 	if ok {
-		n.Title = title
-		n.Text = text
+		n.Title = note.Title
+		n.Text = note.Text
 		imr.notes[n.Id] = n
 		return nil
 	} else {
-		return fmt.Errorf("note with id '%d' not found", id)
+		return fmt.Errorf("note with id '%d' not found", note.Id)
 	}
 }
 

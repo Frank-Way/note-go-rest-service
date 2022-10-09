@@ -7,7 +7,7 @@ import (
 
 type User struct {
 	Login    string `db:"login" json:"login"`
-	Password string `db:"password" json:"password"`
+	Password string `db:"password" json:"-"`
 }
 
 type Users = []User

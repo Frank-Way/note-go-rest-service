@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"regexp"
 )
 
 type Handler struct {
@@ -20,27 +21,32 @@ func NewHandler(repository Repository, logger *logrus.Logger) *Handler {
 	}
 }
 
+var (
+	noLoginRe = regexp.MustCompile(`^/api/v1/users$`)
+	loginRe   = regexp.MustCompile(`^/api/v1/users/([A-Za-z0-9_]+)$`)
+)
+
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.logger.Trace("handle user request")
 	w.Header().Set("content-type", "application/json")
 	switch {
-	case r.Method == http.MethodPost && NoLoginRe.MatchString(r.URL.Path):
+	case r.Method == http.MethodPost && noLoginRe.MatchString(r.URL.Path):
 		h.logger.Trace("delegate to save handler")
 		h.SaveHandler(w, r)
 		return
-	case r.Method == http.MethodGet && LoginRe.MatchString(r.URL.Path):
+	case r.Method == http.MethodGet && loginRe.MatchString(r.URL.Path):
 		h.logger.Trace("delegate to get handler")
 		h.GetHandler(w, r)
 		return
-	case r.Method == http.MethodGet && NoLoginRe.MatchString(r.URL.Path):
+	case r.Method == http.MethodGet && noLoginRe.MatchString(r.URL.Path):
 		h.logger.Trace("delegate to get all handler")
 		h.GetAllHandler(w, r)
 		return
-	case r.Method == http.MethodPut && LoginRe.MatchString(r.URL.Path):
+	case r.Method == http.MethodPut && loginRe.MatchString(r.URL.Path):
 		h.logger.Trace("delegate to update handler")
 		h.UpdateHandler(w, r)
 		return
-	case r.Method == http.MethodDelete && LoginRe.MatchString(r.URL.Path):
+	case r.Method == http.MethodDelete && loginRe.MatchString(r.URL.Path):
 		h.logger.Trace("delegate to delete handler")
 		h.DeleteHandler(w, r)
 		return
@@ -59,7 +65,7 @@ func (h *Handler) SaveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := context.TODO()
-	uri, err := h.repository.Save(ctx, u.Login, u.Password)
+	uri, err := h.repository.Save(ctx, u)
 	if err != nil {
 		handleError(w, r, err)
 		return
@@ -121,8 +127,9 @@ func (h *Handler) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 		handleError(w, r, err)
 		return
 	}
+	u.Login = login
 	ctx := context.TODO()
-	if err := h.repository.Update(ctx, login, u.Password); err != nil {
+	if err := h.repository.Update(ctx, u); err != nil {
 		handleError(w, r, err)
 		return
 	}
@@ -159,7 +166,7 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func getLoginFromUrl(r *http.Request) (string, error) {
-	matches := LoginRe.FindStringSubmatch(r.URL.Path)
+	matches := loginRe.FindStringSubmatch(r.URL.Path)
 	if len(matches) < 2 {
 		return "", fmt.Errorf("no login in url")
 	}
