@@ -1,0 +1,131 @@
+### create user
+POST http://127.0.0.1:8800/api/v1/users
+Content-Type: application/json
+
+{
+  "login": "login1",
+  "password": "password1"
+}
+
+> {%
+client.test("User created successfully", function() {
+  client.assert(response.status === 201, "Response status is not 201");
+});
+%}
+
+### atempt to create existing user
+POST http://127.0.0.1:8800/api/v1/users
+Content-Type: application/json
+
+{
+  "login": "login1",
+  "password": "password1"
+}
+
+> {%
+client.test("User was not created", function() {
+  client.assert(response.status >= 400, "Response status is not >= 400");
+});
+%}
+
+### create another user
+POST http://127.0.0.1:8800/api/v1/users
+Content-Type: application/json
+
+{
+  "login": "login2",
+  "password": "password2"
+}
+
+> {%
+client.test("User created successfully", function() {
+  client.assert(response.status === 201, "Response status is not 201");
+});
+%}
+
+### get user
+GET http://127.0.0.1:8800/api/v1/users/login1
+
+> {%
+client.test("User read successfully", function() {
+    client.assert(response.status === 200, "Response status is not 200");
+    const type = response.contentType.mimeType;
+    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+});
+%}
+
+### get users
+GET http://127.0.0.1:8800/api/v1/users
+
+> {%
+client.test("Users read successfully", function() {
+    client.assert(response.status === 200, "Response status is not 200");
+    const type = response.contentType.mimeType;
+    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+});
+%}
+
+### atempt to get non-existing user
+GET http://127.0.0.1:8800/api/v1/users/login999
+
+> {%
+client.test("User was not found", function() {
+  client.assert(response.status >= 400, "Response status is not >= 400");
+});
+%}
+
+### update user
+PUT http://127.0.0.1:8800/api/v1/users/login1
+Content-Type: application/json
+
+{
+  "password": "password2"
+}
+
+> {%
+client.test("Users updated successfully", function() {
+    client.assert(response.status === 204, "Response status is not 204");
+});
+%}
+
+### atempt to update non-existing user
+PUT http://127.0.0.1:8800/api/v1/users/login999
+Content-Type: application/json
+
+{
+  "password": "password999"
+}
+
+> {%
+client.test("User was not updated", function() {
+  client.assert(response.status >= 400, "Response status is not >= 400");
+});
+%}
+
+### delete user
+DELETE http://127.0.0.1:8800/api/v1/users/login1
+
+> {%
+client.test("Users deleted successfully", function() {
+    client.assert(response.status === 204, "Response status is not 204");
+});
+%}
+
+### delete another user
+DELETE http://127.0.0.1:8800/api/v1/users/login2
+
+> {%
+client.test("Users deleted successfully", function() {
+    client.assert(response.status === 204, "Response status is not 204");
+});
+%}
+
+### atempt to delete non-existing user
+DELETE http://127.0.0.1:8800/api/v1/users/login999
+
+> {%
+client.test("User was not deleted", function() {
+  client.assert(response.status >= 400, "Response status is not >= 400");
+});
+%}
+
