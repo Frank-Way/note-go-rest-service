@@ -4,7 +4,8 @@ Content-Type: application/json
 
 {
   "login": "login1",
-  "password": "password1"
+  "password": "password1",
+  "repeat_password": "password1"
 }
 
 > {%
@@ -19,9 +20,9 @@ Content-Type: application/json
 
 {
   "login": "login1",
-  "password": "password1"
+  "password": "password",
+  "repeat_password": "password"
 }
-
 > {%
 client.test("User was not created", function() {
   client.assert(response.status === 403, "Response status is not 403");
@@ -32,9 +33,11 @@ client.test("User was not created", function() {
 POST http://127.0.0.1:8800/api/v1/users
 Content-Type: application/json
 
+
 {
   "login": "login2",
-  "password": "password2"
+  "password": "password2",
+  "repeat_password": "password2"
 }
 
 > {%
@@ -43,43 +46,45 @@ client.test("User created successfully", function() {
 });
 %}
 
-### get user
-GET http://127.0.0.1:8800/api/v1/users/login1
+#### get user
+#GET http://127.0.0.1:8800/api/v1/users/login1
+#
+#> {%
+#client.test("User read successfully", function() {
+#    client.assert(response.status === 200, "Response status is not 200");
+#    const type = response.contentType.mimeType;
+#    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+#});
+#%}
 
-> {%
-client.test("User read successfully", function() {
-    client.assert(response.status === 200, "Response status is not 200");
-    const type = response.contentType.mimeType;
-    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
-});
-%}
+#### get users
+#GET http://127.0.0.1:8800/api/v1/users
+#
+#> {%
+#client.test("Users read successfully", function() {
+#    client.assert(response.status === 200, "Response status is not 200");
+#    const type = response.contentType.mimeType;
+#    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+#});
+#%}
 
-### get users
-GET http://127.0.0.1:8800/api/v1/users
-
-> {%
-client.test("Users read successfully", function() {
-    client.assert(response.status === 200, "Response status is not 200");
-    const type = response.contentType.mimeType;
-    client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
-});
-%}
-
-### atempt to get non-existing user
-GET http://127.0.0.1:8800/api/v1/users/login999
-
-> {%
-client.test("User was not found", function() {
-  client.assert(response.status === 404, "Response status is not 404");
-});
-%}
+#### atempt to get non-existing user
+#GET http://127.0.0.1:8800/api/v1/users/login999
+#
+#> {%
+#client.test("User was not found", function() {
+#  client.assert(response.status === 404, "Response status is not 404");
+#});
+#%}
 
 ### update user
 PUT http://127.0.0.1:8800/api/v1/users/login1
 Content-Type: application/json
 
 {
-  "password": "password2"
+  "old_password": "password1",
+  "new_password": "password33",
+  "repeat_new_password": "password33"
 }
 
 > {%
@@ -93,12 +98,30 @@ PUT http://127.0.0.1:8800/api/v1/users/login999
 Content-Type: application/json
 
 {
-  "password": "password999"
+  "old_password": "password1",
+  "new_password": "password33",
+  "repeat_new_password": "password33"
 }
 
 > {%
 client.test("User was not updated", function() {
   client.assert(response.status === 404, "Response status is not 404");
+});
+%}
+
+### atempt to update with wrong credentials
+PUT http://127.0.0.1:8800/api/v1/users/login2
+Content-Type: application/json
+
+{
+  "old_password": "password3",
+  "new_password": "password",
+  "repeat_new_password": "password"
+}
+
+> {%
+client.test("User was not updated", function() {
+  client.assert(response.status === 401, "Response status is not 401");
 });
 %}
 
@@ -126,6 +149,15 @@ DELETE http://127.0.0.1:8800/api/v1/users/login999
 > {%
 client.test("User was not deleted", function() {
   client.assert(response.status === 404, "Response status is not 404");
+});
+%}
+
+### atempt to delete deleted user
+DELETE http://127.0.0.1:8800/api/v1/users/login1
+
+> {%
+client.test("User was not deleted", function() {
+  client.assert(response.status === 401, "Response status is not 401");
 });
 %}
 

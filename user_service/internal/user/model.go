@@ -5,8 +5,10 @@ import (
 )
 
 type User struct {
+	Id       uint   `db:"id" json:"id"`
 	Login    string `db:"login" json:"login"`
 	Password string `db:"password" json:"-"`
+	IsActive bool   `db:"is_active" json:"-"`
 }
 
 type Users = []User
@@ -36,20 +38,6 @@ func generatePasswordHash(password string) (string, error) {
 	return string(hash), nil
 }
 
-type CreateUserDTO struct {
-	Login          string `json:"login"`
-	Password       string `json:"password"`
-	RepeatPassword string `json:"repeat_password"`
-}
-
-type UpdateUserDTO struct {
-	Login             string `json:"login"`
-	Password          string `json:"password"`
-	OldPassword       string `json:"old_password"`
-	NewPassword       string `json:"new_password"`
-	RepeatNewPassword string `json:"repeat_new_password"`
-}
-
 func NewUser(dto CreateUserDTO) User {
 	return User{
 		Login:    dto.Login,
@@ -57,9 +45,9 @@ func NewUser(dto CreateUserDTO) User {
 	}
 }
 
-func UpdateUser(dto UpdateUserDTO) User {
+func UpdateUser(login string, dto UpdateUserDTO) User {
 	return User{
-		Login:    dto.Login,
-		Password: dto.Password,
+		Login:    login,
+		Password: dto.NewPassword,
 	}
 }

@@ -63,7 +63,7 @@ func (imr *inMemoryRepository) GetById(ctx context.Context, id uint) (note.Note,
 	} else {
 		imr.logger.Debugf("note was not found, id: %d", id)
 		err := nerror.ErrorNotFound
-		err.DeveloperMessage = fmt.Sprintf("note with id '%d' not found", id)
+		err.Message = fmt.Sprintf("note with id '%d' not found", id)
 		return note.Note{}, err
 	}
 }
@@ -108,7 +108,7 @@ func (imr *inMemoryRepository) Update(ctx context.Context, note note.Note) error
 	} else {
 		imr.logger.Debugf("note was not found, id: %d", n.Id)
 		err := nerror.ErrorNotFound
-		err.DeveloperMessage = fmt.Sprintf("note with id '%d' not found", n.Id)
+		err.Message = fmt.Sprintf("note with id '%d' not found", n.Id)
 		return err
 	}
 }
@@ -132,7 +132,7 @@ func (imr *inMemoryRepository) Delete(ctx context.Context, id uint) error {
 	} else {
 		imr.logger.Debugf("note was not found, id: %d", id)
 		err := nerror.ErrorNotFound
-		err.DeveloperMessage = fmt.Sprintf("note with id '%d' not found", id)
+		err.Message = fmt.Sprintf("note with id '%d' not found", id)
 		return err
 	}
 }

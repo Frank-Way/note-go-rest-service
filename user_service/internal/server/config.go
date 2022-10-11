@@ -17,15 +17,9 @@ type Config struct {
 	Repository struct {
 		Type    string `yaml:"type"`
 		Configs struct {
-			InMemory struct {
-				Attr1 string `yaml:"attr_1"`
-			} `yaml:"in_memory"`
 			Redis struct {
 				Attr1 string `yaml:"attr_1"`
 			} `yaml:"redis"`
-			Postgres struct {
-				Attr1 string `yaml:"attr_1"`
-			} `yaml:"postgres"`
 		} `yaml:"configs"`
 	} `yaml:"repository"`
 }

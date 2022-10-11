@@ -11,7 +11,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&configPath, "config-path", "configs/config.yaml", "path to note_service's config path")
+	flag.StringVar(&configPath, "config-path", "config.yaml", "path to note_service's config path")
 }
 
 func main() {

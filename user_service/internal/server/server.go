@@ -21,12 +21,15 @@ func NewServer(config *Config) *Server {
 	var repository user.Repository
 	if config.Repository.Type == "in_memory" {
 		repository = repositories.NewInMemoryRepository(logger)
+	} else {
+		logger.Fatal("unknown repository type specified in config")
 	}
+	var service = user.NewService(repository, logger)
 	return &Server{
 		config:  config,
 		logger:  logger,
 		router:  http.NewServeMux(),
-		handler: user.NewHandler(repository, logger),
+		handler: user.NewHandler(service, logger),
 	}
 }
 
@@ -62,4 +65,6 @@ func (s *Server) configureRouter() {
 	middleware := uerror.Middleware(s.handler.Handler)
 	s.router.Handle("/api/v1/users/", middleware)
 	s.router.Handle("/api/v1/users", middleware)
+	// TODO DELETE DEBUG ENDPOINTS
+	//s.router.Handle("/debug/allusers", middleware)
 }

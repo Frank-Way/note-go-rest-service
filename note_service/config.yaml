@@ -8,9 +8,7 @@ listen:
 repository:
   type: "in_memory"
   configs:
-    in_memory:
-      attr_1: "val1"
     redis:
       attr_1: "val1"
-    postgres:
-      attr_1: "val1"
+user_service:
+  url: "http://127.0.0.1:8800"

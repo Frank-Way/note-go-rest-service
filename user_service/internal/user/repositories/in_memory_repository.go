@@ -15,13 +15,15 @@ type inMemoryRepository struct {
 	sync.Mutex
 	logger *logrus.Logger
 
-	users map[string]user.User
+	users  map[uint]user.User
+	nextId uint
 }
 
 func NewInMemoryRepository(logger *logrus.Logger) user.Repository {
 	imr := &inMemoryRepository{}
-	imr.users = make(map[string]user.User)
 	imr.logger = logger
+	imr.users = make(map[uint]user.User)
+	imr.nextId = 1
 	return imr
 }
 
@@ -31,10 +33,11 @@ func (imr *inMemoryRepository) Save(ctx context.Context, user user.User) (string
 
 	imr.logger.Info("save user to in_memory_repository")
 	imr.logger.Debug("check if user exists")
-	if _, ok := imr.users[user.Login]; ok {
+	exists, _ := imr.findUserByLogin(user.Login)
+	if exists {
 		imr.logger.Debug("user already exists in memory")
 		err := uerror.ErrorDuplicate
-		err.DeveloperMessage = fmt.Sprintf("there are user with specified login '%s'", user.Login)
+		err.Message = fmt.Sprintf("there are user with specified login '%s'", user.Login)
 		return "", err
 	}
 	imr.logger.Debug("generate password hash")
@@ -42,7 +45,9 @@ func (imr *inMemoryRepository) Save(ctx context.Context, user user.User) (string
 		imr.logger.Debugf("error during password hashing: %v", err)
 		return "", err
 	}
-	imr.users[user.Login] = user
+	user.Id = imr.nextId
+	imr.nextId++
+	imr.users[user.Id] = user
 	imr.logger.Debug("user was saved")
 	return user.Login, nil
 }
@@ -52,15 +57,33 @@ func (imr *inMemoryRepository) GetByLogin(ctx context.Context, login string) (us
 	defer imr.Unlock()
 
 	imr.logger.Info("get user from in_memory_repository")
-	imr.logger.Debugf("find user by login: %s", login)
-	u, ok := imr.users[login]
-	if ok {
+	imr.logger.Debug("check if user exists")
+	exists, u := imr.findUserByLogin(login)
+	if exists {
 		imr.logger.Debug("user found")
 		return u, nil
 	} else {
 		imr.logger.Debugf("user was not found, login: %s", login)
 		err := uerror.ErrorNotFound
-		err.DeveloperMessage = fmt.Sprintf("user with login '%s' not found", login)
+		err.Message = fmt.Sprintf("user with login '%s' not found", login)
+		return user.User{}, err
+	}
+}
+
+func (imr *inMemoryRepository) GetById(ctx context.Context, id uint) (user.User, error) {
+	imr.Lock()
+	defer imr.Unlock()
+
+	imr.logger.Info("get user from in_memory_repository")
+	imr.logger.Debugf("find user by id: %d", id)
+	u, ok := imr.users[id]
+	if ok {
+		imr.logger.Debug("user found")
+		return u, nil
+	} else {
+		imr.logger.Debugf("user was not found, id: %d", id)
+		err := uerror.ErrorNotFound
+		err.Message = fmt.Sprintf("user with id '%d' not found", id)
 		return user.User{}, err
 	}
 }
@@ -83,8 +106,8 @@ func (imr *inMemoryRepository) Update(ctx context.Context, user user.User) error
 	defer imr.Unlock()
 
 	imr.logger.Info("update user in in_memory_repository")
-	imr.logger.Debugf("find user by login: %s", user.Login)
-	u, ok := imr.users[user.Login]
+	imr.logger.Debugf("find user by id: %d", user.Id)
+	u, ok := imr.users[user.Id]
 	if ok {
 		imr.logger.Debug("user found")
 		imr.logger.Debug("update password")
@@ -94,33 +117,65 @@ func (imr *inMemoryRepository) Update(ctx context.Context, user user.User) error
 			imr.logger.Debugf("error during password hashing: %v", err)
 			return err
 		}
-		imr.users[u.Login] = u
+		imr.logger.Debug("update status")
+		u.IsActive = user.IsActive
+		imr.users[u.Id] = u
 		imr.logger.Debug("user updated")
 		return nil
 	} else {
-		imr.logger.Debugf("user was not found, login: %s", user.Login)
+		imr.logger.Debugf("user was not found, id: %d", user.Id)
 		err := uerror.ErrorNotFound
-		err.DeveloperMessage = fmt.Sprintf("user with login '%s' not found", user.Login)
+		err.Message = fmt.Sprintf("user with id '%d' not found", user.Id)
 		return err
 	}
 }
 
-func (imr *inMemoryRepository) Delete(ctx context.Context, login string) error {
+func (imr *inMemoryRepository) DeleteByLogin(ctx context.Context, login string) error {
 	imr.Lock()
 	defer imr.Unlock()
 
 	imr.logger.Info("delete user from in_memory_repository")
 	imr.logger.Debugf("find user by login: %s", login)
-	u, ok := imr.users[login]
-	if ok {
+	exists, u := imr.findUserByLogin(login)
+	if exists {
 		imr.logger.Debug("user found")
-		delete(imr.users, u.Login)
+		delete(imr.users, u.Id)
 		imr.logger.Debug("user deleted")
 		return nil
 	} else {
 		imr.logger.Debugf("user was not found, login: %s", login)
 		err := uerror.ErrorNotFound
-		err.DeveloperMessage = fmt.Sprintf("user with login '%s' not found", login)
+		err.Message = fmt.Sprintf("user with login '%s' not found", login)
 		return err
 	}
+}
+
+func (imr *inMemoryRepository) DeleteById(ctx context.Context, id uint) error {
+	imr.Lock()
+	defer imr.Unlock()
+
+	imr.logger.Info("delete user from in_memory_repository")
+	imr.logger.Debugf("find user by id: %d", id)
+	_, ok := imr.users[id]
+	if ok {
+		imr.logger.Debug("user found")
+		delete(imr.users, id)
+		imr.logger.Debug("user deleted")
+		return nil
+	} else {
+		imr.logger.Debugf("user was not found, id: %d", id)
+		err := uerror.ErrorNotFound
+		err.Message = fmt.Sprintf("user with id '%d' not found", id)
+		return err
+	}
+}
+
+func (imr *inMemoryRepository) findUserByLogin(login string) (bool, user.User) {
+	imr.logger.Debugf("check if login is free: %s", login)
+	for _, v := range imr.users {
+		if v.Login == login {
+			return true, v
+		}
+	}
+	return false, user.User{}
 }

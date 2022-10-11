@@ -17,21 +17,28 @@ func Middleware(h appHandler) http.HandlerFunc {
 			if errors.As(err, &userError) {
 				if errors.Is(err, ErrorNotFound) {
 					w.WriteHeader(http.StatusNotFound)
-					w.Write(ErrorNotFound.Marshal())
+					//w.Write(ErrorNotFound.Marshal())
 					return
 				} else if errors.Is(err, ErrorDuplicate) {
 					w.WriteHeader(http.StatusForbidden)
-					w.Write(ErrorDuplicate.Marshal())
+					//w.Write(ErrorDuplicate.Marshal())
 				} else if errors.Is(err, ErrorRepository) {
 					w.WriteHeader(http.StatusInternalServerError)
-					w.Write(ErrorRepository.Marshal())
+					//w.Write(ErrorRepository.Marshal())
 				} else if errors.Is(err, ErrorNoAuth) {
 					w.WriteHeader(http.StatusUnauthorized)
-					w.Write(ErrorNoAuth.Marshal())
+					//w.Write(ErrorNoAuth.Marshal())
+				} else if errors.Is(err, ErrorPasswordsMismatch) {
+					w.WriteHeader(http.StatusUnauthorized)
+					//w.Write(ErrorPasswordsMismatch.Marshal())
+				} else if errors.Is(err, ErrorWrongCredentials) {
+					w.WriteHeader(http.StatusUnauthorized)
+					//w.Write(ErrorWrongCredentials.Marshal())
+				} else {
+					w.WriteHeader(http.StatusBadRequest)
 				}
 
 				err = err.(*UserError)
-				w.WriteHeader(http.StatusBadRequest)
 				w.Write(userError.Marshal())
 				return
 			}

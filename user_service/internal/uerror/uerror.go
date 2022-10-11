@@ -3,10 +3,12 @@ package uerror
 import "encoding/json"
 
 var (
-	ErrorNotFound   = NewUserError(nil, "user not found", "", "US-1")
-	ErrorDuplicate  = NewUserError(nil, "user already exists", "", "US-2")
-	ErrorRepository = NewUserError(nil, "repository error", "", "US-3")
-	ErrorNoAuth     = NewUserError(nil, "no authorized", "", "US-4")
+	ErrorNotFound          = NewUserError(nil, "user not found", "", "US-1")
+	ErrorDuplicate         = NewUserError(nil, "user already exists", "", "US-2")
+	ErrorRepository        = NewUserError(nil, "repository error", "", "US-3")
+	ErrorNoAuth            = NewUserError(nil, "no authorized", "", "US-4")
+	ErrorPasswordsMismatch = NewUserError(nil, "passwords mismatches", "", "US-5")
+	ErrorWrongCredentials  = NewUserError(nil, "wrong credentials", "", "US-6")
 )
 
 type UserError struct {

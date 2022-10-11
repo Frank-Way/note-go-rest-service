@@ -18,11 +18,17 @@ type Server struct {
 
 func NewServer(config *Config) *Server {
 	var logger = logrus.New()
+	var repository note.Repository
+	if config.Repository.Type == "in_memory" {
+		repository = repositories.NewInMemoryRepository(logger)
+	} else {
+		logger.Fatal("unknown repository type specified in config")
+	}
 	return &Server{
 		config:  config,
 		logger:  logger,
 		router:  http.NewServeMux(),
-		handler: note.NewHandler(repositories.NewInMemoryRepository(logger), logger),
+		handler: note.NewHandler(repository, logger),
 	}
 }
 
