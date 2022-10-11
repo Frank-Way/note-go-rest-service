@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/Frank-Way/note-go-rest-service/note_service/internal/nerror"
 	"github.com/Frank-Way/note-go-rest-service/note_service/internal/note"
 	"github.com/Frank-Way/note-go-rest-service/note_service/internal/note/repositories"
 	"github.com/sirupsen/logrus"
@@ -54,6 +55,7 @@ func (s *Server) configureLogger() error {
 
 func (s *Server) configureRouter() {
 	s.logger.Debug("configuring router")
-	s.router.Handle("/api/v1/notes", s.handler)
-	s.router.Handle("/api/v1/notes/", s.handler)
+	middleware := nerror.Middleware(s.handler.Handler)
+	s.router.Handle("/api/v1/notes", middleware)
+	s.router.Handle("/api/v1/notes/", middleware)
 }

@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -15,7 +14,7 @@ type Users = []User
 func (u *User) CheckPassword(password string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	if err != nil {
-		return fmt.Errorf("password does not match")
+		return err
 	}
 	return nil
 }
@@ -32,7 +31,7 @@ func (u *User) GeneratePasswordHash() error {
 func generatePasswordHash(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 	if err != nil {
-		return "", fmt.Errorf("error occured while hashing password: %w", err)
+		return "", err
 	}
 	return string(hash), nil
 }

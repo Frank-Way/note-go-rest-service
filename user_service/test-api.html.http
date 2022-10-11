@@ -24,7 +24,7 @@ Content-Type: application/json
 
 > {%
 client.test("User was not created", function() {
-  client.assert(response.status >= 400, "Response status is not >= 400");
+  client.assert(response.status === 403, "Response status is not 403");
 });
 %}
 
@@ -70,7 +70,7 @@ GET http://127.0.0.1:8800/api/v1/users/login999
 
 > {%
 client.test("User was not found", function() {
-  client.assert(response.status >= 400, "Response status is not >= 400");
+  client.assert(response.status === 404, "Response status is not 404");
 });
 %}
 
@@ -98,7 +98,7 @@ Content-Type: application/json
 
 > {%
 client.test("User was not updated", function() {
-  client.assert(response.status >= 400, "Response status is not >= 400");
+  client.assert(response.status === 404, "Response status is not 404");
 });
 %}
 
@@ -125,7 +125,7 @@ DELETE http://127.0.0.1:8800/api/v1/users/login999
 
 > {%
 client.test("User was not deleted", function() {
-  client.assert(response.status >= 400, "Response status is not >= 400");
+  client.assert(response.status === 404, "Response status is not 404");
 });
 %}
 
