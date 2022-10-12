@@ -1,0 +1,12 @@
+---
+
+log_level: "trace"
+listen:
+  type: "port"
+  bind_ip: "127.0.0.1"
+  port: "10000"
+storage:
+  type: "in_memory"
+  configs:
+    redis:
+      attr_1: "val1"

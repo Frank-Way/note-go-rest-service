@@ -3,14 +3,14 @@ package nerror
 import "encoding/json"
 
 var (
-	ErrorNotFound   = NewNoteError(nil, "note not found", "", "NS-1")
-	ErrorDuplicate  = NewNoteError(nil, "note already exists", "", "NS-2")
-	ErrorRepository = NewNoteError(nil, "repository error", "", "NS-3")
-	ErrorNoAuth     = NewNoteError(nil, "no authorized", "", "NS-4")
+	ErrorNotFound  = NewNoteError(nil, "note not found", "", "NS-1")
+	ErrorDuplicate = NewNoteError(nil, "note already exists", "", "NS-2")
+	ErrorStorage   = NewNoteError(nil, "storage error", "", "NS-3")
+	ErrorNoAuth    = NewNoteError(nil, "no authorized", "", "NS-4")
 )
 
 type NoteError struct {
-	Err              error  `json:"-"`
+	Err              error  `json:"cause"`
 	Message          string `json:"message"`
 	DeveloperMessage string `json:"developer_message"`
 	Code             string `json:"code"`

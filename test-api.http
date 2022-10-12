@@ -1,0 +1,124 @@
+### create user
+POST http://127.0.0.1:10000/api/v1/users
+Content-Type: application/json
+
+{
+  "login": "login1",
+  "password": "password1",
+  "repeat_password": "password1"
+}
+
+> {%
+client.test("User created successfully", function() {
+  client.assert(response.status === 201, "Response status is not 201");
+});
+%}
+
+### atempt to create existing user
+POST http://127.0.0.1:10000/api/v1/users
+Content-Type: application/json
+
+{
+  "login": "login1",
+  "password": "password",
+  "repeat_password": "password"
+}
+
+> {%
+client.test("User was not created", function() {
+  client.assert(response.status === 403, "Response status is not 403");
+});
+%}
+
+### create another user
+POST http://127.0.0.1:10000/api/v1/users
+Content-Type: application/json
+
+{
+  "login": "login2",
+  "password": "password2",
+  "repeat_password": "password2"
+}
+
+> {%
+client.test("User created successfully", function() {
+  client.assert(response.status === 201, "Response status is not 201");
+});
+%}
+
+### authorize
+POST http://127.0.0.1:10000/api/v1/users/login1
+Content-Type: application/json
+
+{
+  "password": "password1"
+}
+
+> {%
+client.test("User authorized successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+  client.log(response.body.toLowerCase())
+  client.global.set("token", "Bearer " + response.headers.valueOf("Authorization"))
+});
+%}
+
+### attempt to authorize using wrong creds
+POST http://127.0.0.1:10000/api/v1/users/login2
+Content-Type: application/json
+
+{
+  "password": "password1"
+}
+
+> {%
+client.test("User authorized successfully", function() {
+  client.assert(response.status === 401, "Response status is not 401");
+});
+%}
+
+### attempt to create note without authoriztion
+POST http://127.0.0.1:10000/api/v1/notes
+Content-Type: application/json
+
+{
+  "title": "title1",
+  "text": "text1"
+}
+
+> {%
+client.test("Note was not created", function() {
+  client.assert(response.status === 401, "Response status is not 401");
+});
+%}
+
+### attempt to create note with wrong authoriztion
+POST http://127.0.0.1:10000/api/v1/notes
+Content-Type: application/json
+Authorization: dfhfghgfdgd
+
+{
+  "title": "title1",
+  "text": "text1"
+}
+
+> {%
+client.test("Note was not created", function() {
+  client.assert(response.status === 401, "Response status is not 401");
+});
+%}
+
+### create note
+POST http://127.0.0.1:10000/api/v1/notes
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "title": "title1",
+  "text": "text1"
+}
+
+> {%
+client.test("Note created successfully", function() {
+  client.assert(response.status === 201, "Response status is not 201");
+});
+%}
