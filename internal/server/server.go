@@ -9,6 +9,7 @@ import (
 	userStorage "github.com/Frank-Way/note-go-rest-service/internal/user/storage"
 	"github.com/Frank-Way/note-go-rest-service/internal/user/uerror"
 	"github.com/sirupsen/logrus"
+	"io"
 	"net"
 	"net/http"
 	"strconv"
@@ -110,7 +111,5 @@ func (s *Server) configureRouter() {
 	s.router.Handle("/api/v1/notes/", nMiddleware)
 	s.router.Handle("/api/v1/notes", nMiddleware)
 
-	// TODO DELETE DEBUG ENDPOINTS
-	//s.router.Handle("/debug/allusers", uMiddleware)
-	//s.router.Handle("/debug/allnotes", nMiddleware)
+	s.router.HandleFunc("/health", func(rw http.ResponseWriter, r *http.Request) { io.WriteString(rw, "I'm healthy") })
 }

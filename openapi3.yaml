@@ -1,0 +1,284 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://0.0.0.0:10000'
+info:
+  description: ''
+  version: 1.0.0
+  title: Note Goland RESTful service
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    email: 'frerard.1992@mail.ru'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: note
+    description: Operations about notes
+  - name: user
+    description: Operations about user
+paths:
+  /api/v1/users:
+    post:
+      tags:
+        - user
+      summary: Create new user
+      description: Login must be unique. Returns URI of new user
+      operationId: sign up
+      responses:
+        '201':
+          description: user created
+        '403':
+          description: user was not created (login used by another user)
+        '500':
+          description: internal server error
+      security: []
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserDTO'
+        description: User's creds
+  '/api/v1/users/{login}':
+    put:
+      tags:
+        - user
+      summary: Update user
+      description: This can only be done by the logged in user
+      operationId: change password
+      parameters: []
+      responses:
+        '204':
+          description: user updated
+        '401':
+          description: user not authorized
+        '404':
+          description: user not found
+        '500':
+          description: internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDTO'
+        description: Old and new creds
+        required: true
+    delete:
+      tags:
+        - user
+      summary: Delete user
+      description: This can only be done by the logged in user
+      operationId: delete user
+      parameters: []
+      responses:
+        '204':
+          description: user deleted
+        '401':
+          description: user not authorized
+        '404':
+          description: user not found
+        '500':
+          description: internal server error
+    post:
+      tags:
+        - user
+      summary: Authorize user
+      description: Returns JWT token
+      operationId: sign in
+      parameters: []
+      responses:
+        '200':
+          description: user authorized
+          content:
+            application/json:
+              schema: {}
+        '401':
+          description: invalid creds supplied
+        '404':
+          description: user not found
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthUserDTO'
+        description: User's creds
+    summary: ''
+  /api/v1/notes:
+    get:
+      summary: Get all notes
+      description: >-
+        Get all user's notes. User will be identified by JWT token in
+        "Authorization" header. This can only be done by the logged in user
+      parameters: []
+      operationId: get notes
+      responses:
+        '200':
+          description: got notes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notes'
+        '401':
+          description: user not authorized
+        '500':
+          description: internal server error
+      tags:
+        - note
+    post:
+      summary: Create note
+      description: Create note. This can only be done by the logged in user
+      parameters: []
+      operationId: create note
+      responses:
+        '201':
+          description: note created
+        '401':
+          description: user not authorized
+        '500':
+          description: internal server error
+      tags:
+        - note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNoteDTO'
+        description: Title and text of note to create
+  /api/v1/notes/{id}:
+    get:
+      summary: Get note
+      description: 'Get note with specified Id, This can only be done by the logged in user'
+      parameters: []
+      operationId: get note
+      responses:
+        '200':
+          description: got note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '401':
+          description: user not authorized
+        '404':
+          description: note not found
+        '500':
+          description: internal server error
+      tags:
+        - note
+    put:
+      summary: Update note
+      description: Full update. This can only be done by the logged in user
+      parameters: []
+      operationId: update note
+      responses:
+        '204':
+          description: note updated
+        '401':
+          description: user not authorized
+        '404':
+          description: note not found
+        '500':
+          description: internal server error
+      tags:
+        - note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNoteDTO'
+        description: All fields of new note
+    delete:
+      summary: 'Delete note'
+      description: This can only be done by the logged in user
+      parameters: []
+      operationId: delete note
+      responses:
+        '204':
+          description: note deleted
+        '401':
+          description: user not authorized
+        '404':
+          description: note not found
+        '500':
+          description: internal server error
+      tags:
+        - note
+components:
+  schemas:
+    UpdateUserDTO:
+      type: object
+      properties:
+        old_password:
+          type: string
+        new_password:
+          type: string
+        repeat_new_password:
+          type: string
+    AuthUserDTO:
+      type: object
+      properties:
+        password:
+          type: string
+    CreateNoteDTO:
+      type: object
+      properties:
+        title:
+          type: string
+        text:
+          type: string
+    CreateUserDTO:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+        repeat_password:
+          type: string
+    UpdateNoteDTO:
+      type: object
+      properties:
+        title:
+          type: string
+        text:
+          type: string
+    Note:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        text:
+          type: string
+        author:
+          type: string
+          description: user's login
+    Notes:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            format: int64
+          title:
+            type: string
+          text:
+            type: string
+          author:
+            type: string
+            description: user's login
+  securitySchemes:
+    auth:
+      type: apiKey
+      in: header
+      name: Authorization
+  links: {}
+  callbacks: {}
+security: []

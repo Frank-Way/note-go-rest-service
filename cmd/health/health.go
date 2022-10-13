@@ -1,9 +1,11 @@
-package main
+package health
 
 import (
 	"flag"
+	"fmt"
 	"github.com/Frank-Way/note-go-rest-service/internal/server"
-	"log"
+	"net/http"
+	"os"
 )
 
 var (
@@ -18,9 +20,8 @@ func main() {
 	flag.Parse()
 
 	config := server.NewConfig(configPath)
-
-	s := server.NewServer(config)
-	if err := s.Start(); err != nil {
-		log.Fatal(err)
+	_, err := http.Get(fmt.Sprintf("http://%s:%s/health", config.Listen.BindIP, config.Listen.Port))
+	if err != nil {
+		os.Exit(1)
 	}
 }
