@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/sirupsen/logrus"
 	"time"
@@ -46,14 +45,15 @@ func (s service) GenerateToken(ctx context.Context, login string) (string, error
 }
 
 func (s service) ParseToken(ctx context.Context, tokenStr string) (string, error) {
-	if tokenStr == "" {
-		return "", fmt.Errorf("empty token string")
-	}
+	s.logger.Tracef("got token to parse: %q", tokenStr)
 	token, err := jwt.ParseWithClaims(tokenStr, &UserClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return secret, nil
-		},
-	)
+		})
+	if err != nil {
+		s.logger.Debugf("error during parsing token: %v", err)
+		return "", err
+	}
 	if claims, ok := token.Claims.(*UserClaims); ok && token.Valid {
 		return claims.UserLogin, nil
 	} else {

@@ -3,10 +3,15 @@
 log_level: "trace"
 listen:
   type: "port"
-  bind_ip: "127.0.0.1"
+  bind_ip: "0.0.0.0"
   port: "10000"
 storage:
-  type: "in_memory"
+  type: "redis"
   configs:
     redis:
-      attr_1: "val1"
+      url: "redis-db"
+      port: "6379"
+      db:
+        note_db: "0"
+        user_db: "1"
+      password: ""

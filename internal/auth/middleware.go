@@ -32,7 +32,7 @@ func (m *Middleware) CheckAndParse(ctx context.Context, authStr string) (string,
 		return "", fmt.Errorf("wrong authStr string format")
 	}
 	m.logger.Debug("parse auth token")
-	login, err := m.authSrv.ParseToken(ctx, authStr)
+	login, err := m.authSrv.ParseToken(ctx, authParts[1])
 	if err != nil {
 		m.logger.Debugf("error during token parsing: %v", err)
 		return "", err

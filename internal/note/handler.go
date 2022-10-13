@@ -179,7 +179,7 @@ func (h *Handler) deleteHandler(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func getIdFromUrl(r *http.Request) (uint, error) {
+func getIdFromUrl(r *http.Request) (int, error) {
 	matches := idRe.FindStringSubmatch(r.URL.Path)
 	if len(matches) < 2 {
 		return 0, fmt.Errorf("no id in url")
@@ -188,5 +188,5 @@ func getIdFromUrl(r *http.Request) (uint, error) {
 	if err != nil {
 		return 0, fmt.Errorf("id must be integer")
 	}
-	return uint(id), nil
+	return int(id), nil
 }

@@ -18,7 +18,13 @@ type Config struct {
 		Type    string `yaml:"type"`
 		Configs struct {
 			Redis struct {
-				Attr1 string `yaml:"attr_1"`
+				Url  string `yaml:"url"`
+				Port string `yaml:"port"`
+				Db   struct {
+					NoteDb string `yaml:"note_db"`
+					UserDb string `yaml:"user_db"`
+				} `yaml:"db"`
+				Password string `yaml:"password"`
 			} `yaml:"redis"`
 		} `yaml:"configs"`
 	} `yaml:"storage"`

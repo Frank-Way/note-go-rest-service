@@ -3,10 +3,10 @@ package user
 import "golang.org/x/crypto/bcrypt"
 
 type User struct {
-	Id       uint   `db:"id" json:"id"`
+	Id       int    `db:"id" json:"id"`
 	Login    string `db:"login" json:"login"`
-	Password string `db:"password" json:"-"`
-	IsActive bool   `db:"is_active" json:"-"`
+	Password string `db:"password" json:"password"`
+	IsActive bool   `db:"is_active" json:"is_active"`
 }
 
 type Users = []User
@@ -43,7 +43,7 @@ func NewUser(dto CreateUserDTO) User {
 	}
 }
 
-func UpdateUser(id uint, login string, dto UpdateUserDTO) User {
+func UpdateUser(id int, login string, dto UpdateUserDTO) User {
 	return User{
 		Id:       id,
 		Login:    login,

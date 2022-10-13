@@ -7,7 +7,7 @@ type CreateUserDTO struct {
 }
 
 type UpdateUserDTO struct {
-	//Id                uint   `json:"id"`
+	//Id                int   `json:"id"`
 	//Login             string `json:"login"`
 	OldPassword       string `json:"old_password"`
 	NewPassword       string `json:"new_password"`

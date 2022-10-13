@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net"
 	"net/http"
+	"strconv"
 )
 
 type Server struct {
@@ -28,6 +29,33 @@ func NewServer(config *Config) *Server {
 	if config.Storage.Type == "in_memory" {
 		uStorage = userStorage.NewInMemoryStorage(logger)
 		nStorage = noteStorage.NewInMemoryStorage(logger)
+	} else if config.Storage.Type == "redis" {
+		uDb, err := strconv.Atoi(config.Storage.Configs.Redis.Db.UserDb)
+		if err != nil {
+			logger.Fatal(err)
+		}
+		uStorage, err = userStorage.NewRedisStorage(
+			config.Storage.Configs.Redis.Url,
+			config.Storage.Configs.Redis.Port,
+			config.Storage.Configs.Redis.Password,
+			uDb,
+			logger)
+		if err != nil {
+			logger.Fatal(err)
+		}
+		nDb, err := strconv.Atoi(config.Storage.Configs.Redis.Db.NoteDb)
+		if err != nil {
+			logger.Fatal(err)
+		}
+		nStorage, err = noteStorage.NewRedisStorage(
+			config.Storage.Configs.Redis.Url,
+			config.Storage.Configs.Redis.Port,
+			config.Storage.Configs.Redis.Password,
+			nDb,
+			logger)
+		if err != nil {
+			logger.Fatal(err)
+		}
 	} else {
 		logger.Fatal("unknown storage type specified in config")
 	}

@@ -15,14 +15,14 @@ type inMemoryStorage struct {
 	sync.Mutex
 	logger *logrus.Logger
 
-	users  map[uint]user.User
-	nextId uint
+	users  map[int]user.User
+	nextId int
 }
 
 func NewInMemoryStorage(logger *logrus.Logger) user.Storage {
 	ims := &inMemoryStorage{}
 	ims.logger = logger
-	ims.users = make(map[uint]user.User)
+	ims.users = make(map[int]user.User)
 	ims.nextId = 1
 	return ims
 }
@@ -31,7 +31,7 @@ func (ims *inMemoryStorage) Save(ctx context.Context, user user.User) (string, e
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("save user to in_memory_repository")
+	ims.logger.Info("save user to in_memory_storage")
 	ims.logger.Debug("check if user exists")
 	exists, _ := ims.findUserByLogin(user.Login)
 	if exists {
@@ -56,7 +56,7 @@ func (ims *inMemoryStorage) GetByLogin(ctx context.Context, login string) (user.
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("get user from in_memory_repository")
+	ims.logger.Info("get user from in_memory_storage")
 	ims.logger.Debug("check if user exists")
 	exists, u := ims.findUserByLogin(login)
 	if exists {
@@ -70,11 +70,11 @@ func (ims *inMemoryStorage) GetByLogin(ctx context.Context, login string) (user.
 	}
 }
 
-func (ims *inMemoryStorage) GetById(ctx context.Context, id uint) (user.User, error) {
+func (ims *inMemoryStorage) GetById(ctx context.Context, id int) (user.User, error) {
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("get user from in_memory_repository")
+	ims.logger.Info("get user from in_memory_storage")
 	ims.logger.Debugf("find user by id: %d", id)
 	u, ok := ims.users[id]
 	if ok {
@@ -92,7 +92,7 @@ func (ims *inMemoryStorage) GetAll(ctx context.Context) (user.Users, error) {
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("get users from in_memory_repository")
+	ims.logger.Info("get users from in_memory_storage")
 	var res []user.User
 	for _, v := range ims.users {
 		res = append(res, v)
@@ -105,7 +105,7 @@ func (ims *inMemoryStorage) Update(ctx context.Context, user user.User) error {
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("update user in in_memory_repository")
+	ims.logger.Info("update user in in_memory_storage")
 	ims.logger.Debugf("find user by id: %d", user.Id)
 	u, ok := ims.users[user.Id]
 	if ok {
@@ -134,7 +134,7 @@ func (ims *inMemoryStorage) DeleteByLogin(ctx context.Context, login string) err
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("delete user from in_memory_repository")
+	ims.logger.Info("delete user from in_memory_storage")
 	ims.logger.Debugf("find user by login: %s", login)
 	exists, u := ims.findUserByLogin(login)
 	if exists {
@@ -150,11 +150,11 @@ func (ims *inMemoryStorage) DeleteByLogin(ctx context.Context, login string) err
 	}
 }
 
-func (ims *inMemoryStorage) DeleteById(ctx context.Context, id uint) error {
+func (ims *inMemoryStorage) DeleteById(ctx context.Context, id int) error {
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("delete user from in_memory_repository")
+	ims.logger.Info("delete user from in_memory_storage")
 	ims.logger.Debugf("find user by id: %d", id)
 	_, ok := ims.users[id]
 	if ok {

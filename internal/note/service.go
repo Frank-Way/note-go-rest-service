@@ -11,10 +11,10 @@ var _ Service = &service{}
 
 type Service interface {
 	CreateNote(ctx context.Context, auth string, dto CreateNoteDTO) (string, error)
-	UpdateNote(ctx context.Context, auth string, id uint, dto UpdateNoteDTO) error
-	GetNote(ctx context.Context, auth string, id uint) (Note, error)
+	UpdateNote(ctx context.Context, auth string, id int, dto UpdateNoteDTO) error
+	GetNote(ctx context.Context, auth string, id int) (Note, error)
 	GetAllNotes(ctx context.Context, auth string) (Notes, error)
-	DeleteNote(ctx context.Context, auth string, id uint) error
+	DeleteNote(ctx context.Context, auth string, id int) error
 }
 
 type service struct {
@@ -51,7 +51,7 @@ func (s service) CreateNote(ctx context.Context, authStr string, dto CreateNoteD
 	return uri, nil
 }
 
-func (s service) UpdateNote(ctx context.Context, authStr string, id uint, dto UpdateNoteDTO) error {
+func (s service) UpdateNote(ctx context.Context, authStr string, id int, dto UpdateNoteDTO) error {
 	s.logger.Info("update note in service")
 	s.logger.Debug("parse authStr")
 	authLogin, err := s.authMw.CheckAndParse(ctx, authStr)
@@ -83,7 +83,7 @@ func (s service) UpdateNote(ctx context.Context, authStr string, id uint, dto Up
 	return nil
 }
 
-func (s service) GetNote(ctx context.Context, authStr string, id uint) (Note, error) {
+func (s service) GetNote(ctx context.Context, authStr string, id int) (Note, error) {
 	s.logger.Info("get note in service")
 	s.logger.Debug("parse authStr")
 	authLogin, err := s.authMw.CheckAndParse(ctx, authStr)
@@ -126,7 +126,7 @@ func (s service) GetAllNotes(ctx context.Context, authStr string) (Notes, error)
 	return n, nil
 }
 
-func (s service) DeleteNote(ctx context.Context, authStr string, id uint) error {
+func (s service) DeleteNote(ctx context.Context, authStr string, id int) error {
 	s.logger.Info("get note in service")
 	s.logger.Debug("parse authStr")
 	authLogin, err := s.authMw.CheckAndParse(ctx, authStr)

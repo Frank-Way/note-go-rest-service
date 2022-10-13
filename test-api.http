@@ -1,5 +1,5 @@
 ### create user
-POST http://127.0.0.1:10000/api/v1/users
+POST http://0.0.0.0:10000/api/v1/users
 Content-Type: application/json
 
 {
@@ -15,7 +15,7 @@ client.test("User created successfully", function() {
 %}
 
 ### atempt to create existing user
-POST http://127.0.0.1:10000/api/v1/users
+POST http://0.0.0.0:10000/api/v1/users
 Content-Type: application/json
 
 {
@@ -31,7 +31,7 @@ client.test("User was not created", function() {
 %}
 
 ### create another user
-POST http://127.0.0.1:10000/api/v1/users
+POST http://0.0.0.0:10000/api/v1/users
 Content-Type: application/json
 
 {
@@ -47,7 +47,7 @@ client.test("User created successfully", function() {
 %}
 
 ### authorize
-POST http://127.0.0.1:10000/api/v1/users/login1
+POST http://0.0.0.0:10000/api/v1/users/login1
 Content-Type: application/json
 
 {
@@ -58,12 +58,12 @@ Content-Type: application/json
 client.test("User authorized successfully", function() {
   client.assert(response.status === 200, "Response status is not 200");
   client.log(response.body.toLowerCase())
-  client.global.set("token", "Bearer " + response.headers.valueOf("Authorization"))
+  client.global.set("token", "Bearer " + response.body.trim())
 });
 %}
 
 ### attempt to authorize using wrong creds
-POST http://127.0.0.1:10000/api/v1/users/login2
+POST http://0.0.0.0:10000/api/v1/users/login2
 Content-Type: application/json
 
 {
@@ -72,12 +72,12 @@ Content-Type: application/json
 
 > {%
 client.test("User authorized successfully", function() {
-  client.assert(response.status === 401, "Response status is not 401");
+  client.assert(response.status  >= 400, "Response status is not 401");
 });
 %}
 
 ### attempt to create note without authoriztion
-POST http://127.0.0.1:10000/api/v1/notes
+POST http://0.0.0.0:10000/api/v1/notes
 Content-Type: application/json
 
 {
@@ -87,12 +87,12 @@ Content-Type: application/json
 
 > {%
 client.test("Note was not created", function() {
-  client.assert(response.status === 401, "Response status is not 401");
+  client.assert(response.status  >= 400, "Response status is not 401");
 });
 %}
 
 ### attempt to create note with wrong authoriztion
-POST http://127.0.0.1:10000/api/v1/notes
+POST http://0.0.0.0:10000/api/v1/notes
 Content-Type: application/json
 Authorization: dfhfghgfdgd
 
@@ -103,12 +103,12 @@ Authorization: dfhfghgfdgd
 
 > {%
 client.test("Note was not created", function() {
-  client.assert(response.status === 401, "Response status is not 401");
+  client.assert(response.status  >= 400, "Response status is not 401");
 });
 %}
 
 ### create note
-POST http://127.0.0.1:10000/api/v1/notes
+POST http://0.0.0.0:10000/api/v1/notes
 Content-Type: application/json
 Authorization: {{ token }}
 
@@ -120,5 +120,119 @@ Authorization: {{ token }}
 > {%
 client.test("Note created successfully", function() {
   client.assert(response.status === 201, "Response status is not 201");
+});
+%}
+
+### create another note
+POST http://0.0.0.0:10000/api/v1/notes
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "title": "title2",
+  "text": "text2"
+}
+
+> {%
+client.test("Note created successfully", function() {
+  client.assert(response.status === 201, "Response status is not 201");
+});
+%}
+
+### get notes
+GET http://0.0.0.0:10000/api/v1/notes
+Authorization: {{ token }}
+
+> {%
+client.test("Notes got successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+### get note
+GET http://0.0.0.0:10000/api/v1/notes/1
+Authorization: {{ token }}
+
+> {%
+client.test("Note got successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+### get non-existing note
+GET http://0.0.0.0:10000/api/v1/notes/999
+Authorization: {{ token }}
+
+> {%
+client.test("Note not found", function() {
+  client.assert(response.status >= 400, "Response status is not 404");
+});
+%}
+
+### get note without auth
+GET http://0.0.0.0:10000/api/v1/notes/1
+Authorization: Bearer aaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbb.ccccccccccc
+
+> {%
+client.test("Note not found", function() {
+  client.assert(response.status >= 400, "Response status is not 404");
+});
+%}
+
+### update note
+PUT http://0.0.0.0:10000/api/v1/notes/1
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "title": "title999",
+  "text": "text999"
+}
+
+> {%
+client.test("Note updated", function() {
+  client.assert(response.status === 204, "Response status is not 204");
+});
+%}
+
+### update non-existing note
+PUT http://0.0.0.0:10000/api/v1/notes/999
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "title": "title999",
+  "text": "text999"
+}
+
+> {%
+client.test("Note was not updated", function() {
+  client.assert(response.status >= 400, "Response status is not 404");
+});
+%}
+
+### update note without auth
+PUT http://0.0.0.0:10000/api/v1/notes/1
+Content-Type: application/json
+Authorization: Bearer f
+
+{
+  "title": "title999",
+  "text": "text999"
+}
+
+> {%
+client.test("Note was not updated", function() {
+  client.assert(response.status >= 400, "Response status is not 404");
+});
+%}
+
+### delete note
+DELETE http://0.0.0.0:10000/api/v1/notes/1
+Authorization: {{ token }}
+
+> {%
+client.test("Note was deleted", function() {
+  client.assert(response.status === 204, "Response status is not 204");
 });
 %}

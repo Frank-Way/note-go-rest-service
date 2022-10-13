@@ -16,13 +16,13 @@ type inMemoryStorage struct {
 	sync.Mutex
 	logger *logrus.Logger
 
-	notes  map[uint]note.Note
-	nextId uint
+	notes  map[int]note.Note
+	nextId int
 }
 
 func NewInMemoryStorage(logger *logrus.Logger) note.Storage {
 	ims := &inMemoryStorage{}
-	ims.notes = make(map[uint]note.Note)
+	ims.notes = make(map[int]note.Note)
 	ims.nextId = 1
 	ims.logger = logger
 	return ims
@@ -32,7 +32,7 @@ func (ims *inMemoryStorage) Save(ctx context.Context, note note.Note) (string, e
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("save note to in_memory_repository")
+	ims.logger.Info("save note to in_memory_storage")
 	ims.logger.Debugf("use next id for note: %d", ims.nextId)
 	note.Id = ims.nextId
 	note.Author = "no-author"
@@ -42,11 +42,11 @@ func (ims *inMemoryStorage) Save(ctx context.Context, note note.Note) (string, e
 	return strconv.Itoa(int(note.Id)), nil
 }
 
-func (ims *inMemoryStorage) GetById(ctx context.Context, id uint) (note.Note, error) {
+func (ims *inMemoryStorage) GetById(ctx context.Context, id int) (note.Note, error) {
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("get note from in_memory_repository")
+	ims.logger.Info("get note from in_memory_storage")
 	ims.logger.Debugf("find note by id: %d", id)
 	n, ok := ims.notes[id]
 	if ok {
@@ -64,7 +64,7 @@ func (ims *inMemoryStorage) GetAll(ctx context.Context, login string) (note.Note
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("get notes from in_memory_repository")
+	ims.logger.Info("get notes from in_memory_storage")
 	var res []note.Note
 	for _, v := range ims.notes {
 		if v.Author == login {
@@ -80,7 +80,7 @@ func (ims *inMemoryStorage) Update(ctx context.Context, note note.Note) error {
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("update note in in_memory_repository")
+	ims.logger.Info("update note in in_memory_storage")
 	ims.logger.Debugf("find note by id: %d", note.Id)
 	n, ok := ims.notes[note.Id]
 	if ok {
@@ -99,11 +99,11 @@ func (ims *inMemoryStorage) Update(ctx context.Context, note note.Note) error {
 	}
 }
 
-func (ims *inMemoryStorage) Delete(ctx context.Context, id uint) error {
+func (ims *inMemoryStorage) Delete(ctx context.Context, id int) error {
 	ims.Lock()
 	defer ims.Unlock()
 
-	ims.logger.Info("delete note from in_memory_repository")
+	ims.logger.Info("delete note from in_memory_storage")
 	ims.logger.Debugf("find note by id: %d", id)
 	n, ok := ims.notes[id]
 	if ok {
